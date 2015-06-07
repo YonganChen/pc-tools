@@ -18,8 +18,8 @@
 #define FILE_POSITION_END       (3)
 
 int main(void) {
-	char org_file_name[50] = {"orgin_file.txt\0"};
-	char new_file_name[50] = {"new_file.txt\0"};
+	char org_file_name[50] = {"a.txt\0"};
+	char new_file_name[50] = {"b.txt\0"};
 	FILE* p_orgin_file = NULL;
 	FILE* p_new_file = NULL;
 	int i;
@@ -33,7 +33,10 @@ int main(void) {
 
 	p_orgin_file = fopen(org_file_name, "r");
 	if ( p_orgin_file == NULL ){
-	  printf("%s dose not exist. Byebye.\n", org_file_name);
+	  printf("%s dose not exist.\n", org_file_name);
+	  printf("Please change the name of orginal file to %s\n", org_file_name);
+	  printf("Press enter to exit...");
+	  getchar();
 	  goto exit;
 	}
 
