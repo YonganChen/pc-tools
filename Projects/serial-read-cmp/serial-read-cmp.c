@@ -5,6 +5,7 @@
 #include <termios.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 /* baudrate settings are defined in <asm/termbits.h>, which is
    included by <termios.h> */
@@ -18,13 +19,15 @@
 
 volatile int STOP=FALSE; 
 
-main()
+const char *errstr="Kernel panic";
+const char *endstr="adb_bind_config";
+
+struct termios oldtio,newtio;
+int fd;
+
+//-----------------------------------------------------------
+static void serial_init()
 {
-   int fd,c, res,wrs;
-   struct termios oldtio,newtio;
-   char rbuf[255];
-   char wbuf[255];
-   const char *serstr="mmc0: new high speed SDHC card at address b368";
    /* 
      Open modem device for reading and writing and not as controlling tty
      because we don't want to get killed if linenoise sends CTRL-C.
@@ -98,19 +101,40 @@ main()
       In this example, inputting a 'z' at the beginning of a line will 
       exit the program.
     */
-     while (STOP==FALSE) {     /* loop until we have a terminating condition */
+}
+
+//----------------------------------------------------------
+main()
+{
+   int res, count=0, count_err=0;
+   char rbuf[255];
+   
+   serial_init();
+
+   while (STOP==FALSE) {   
+  
+    /* loop until we have a terminating condition */
     /* read blocks program execution until a line terminating character is 
        input, even if more than 255 chars are input. If the number
        of characters read is smaller than the number of chars available,
        subsequent reads will return the remaining chars. res will be set
        to the actual number of characters actually read */
+
      res = read(fd,rbuf,255); 
-     if (strstr(&rbuf,serstr)!= NULL){
-           printf("%s", "string found\n");
+     rbuf[res]=0;
+   //  printf("%s", rbuf);
+     
+     if (strstr((const char*)&rbuf,errstr)!= NULL){
+           count_err++;
+           printf("%s, n=%d, err=%d\n", errstr, count, count_err);
 	}
-     rbuf[res]=0;             /* set end of string, so we can printf */
-     printf("%s", rbuf);
+     if (strstr((const char*)&rbuf,endstr)!= NULL){
+           count++;
+           printf("manual reboot, n=%d, err=%d\n", count, count_err);
+           write(fd,"reboot\n", 7);
+	}
     }
+
      /* restore the old port settings */
      tcsetattr(fd,TCSANOW,&oldtio);
 }
