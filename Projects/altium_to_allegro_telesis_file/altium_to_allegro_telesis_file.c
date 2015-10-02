@@ -48,17 +48,17 @@ int main(void) {
 
 	while ((fgets(str, 100, p_orgin_file)) != NULL){
 
-		if ( strcmp (str, "$PACKAGES\r\n") == 0 ){
+		if ( strcmp (str, "$PACKAGES\n") == 0 ){
 			file_position = FILE_POSITION_PACKAGES;
 			fputs(str, p_new_file);
 			continue;
 		}
-		if ( strcmp (str, "$NETS\r\n") == 0 ){
+		if ( strcmp (str, "$NETS\n") == 0 ){
 		    file_position = FILE_POSITION_NETS;
 		    fputs(str, p_new_file);
 		    continue;
 		}
-		if ( strcmp (str, "$End\r\n") == 0 ){
+		if ( strcmp (str, "$End\n") == 0 ){
 		    file_position = FILE_POSITION_END;
 		    fputs(str, p_new_file);
 		    continue;
