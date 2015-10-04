@@ -22,11 +22,13 @@ int main(void) {
 	char new_file_name[50] = {"b.txt\0"};
 	FILE* p_orgin_file = NULL;
 	FILE* p_new_file = NULL;
-	int i;
-	char str[100] = {'\0'};
-	char str2[100] = {'\0'};
-	char str3[100] = {'\0'};
-	char str4[100] = {'\0'};
+	int i,j;
+	char str_org[100] = {'\0'};
+	char str_sym[100] = {'\0'};
+	char str_dev[100] = {'\0'};
+	char str_val[100] = {'\0'};
+	char str_ref[100] = {'\0'};
+	char str_new[100] = {'\0'};
 	int  file_position = FILE_POSITION_UNKOWN;
 
 	puts("!!!Hello World, modify telesis file for allegro!!!"); /* prints !!!Hello World!!! */
@@ -46,45 +48,62 @@ int main(void) {
 	  goto exit;
 	}
 
-	while ((fgets(str, 100, p_orgin_file)) != NULL){
+	while ((fgets(str_org, 100, p_orgin_file)) != NULL){
 
-		if ( strcmp (str, "$PACKAGES\n") == 0 ){
+		if ( strcmp (str_org, "$PACKAGES\n") == 0 ){
 			file_position = FILE_POSITION_PACKAGES;
-			fputs(str, p_new_file);
+			fputs(str_org, p_new_file);
 			continue;
 		}
-		if ( strcmp (str, "$NETS\n") == 0 ){
+		if ( strcmp (str_org, "$NETS\n") == 0 ){
 		    file_position = FILE_POSITION_NETS;
-		    fputs(str, p_new_file);
+		    fputs(str_org, p_new_file);
 		    continue;
 		}
-		if ( strcmp (str, "$End\n") == 0 ){
+		if ( strcmp (str_org, "$End\n") == 0 ){
 		    file_position = FILE_POSITION_END;
-		    fputs(str, p_new_file);
+		    fputs(str_org, p_new_file);
 		    continue;
 		}
 
 		if ( file_position == FILE_POSITION_PACKAGES ){
             i = 0;
-		    while ( str[i] != '!' ){
+			// get SYM_NAME
+		    while ( str_org[i] != '!' ){
                i++;
 			}
-		    strncpy (str2, str, i);
-		    str2[i] = '\0';
-			while ( str[i] != ';' ){
-			   i++;
-		    }
-		    strcpy (str3, str+i);
+		    strncpy (str_sym, str_org, i);
+		    str_sym[i] = '\0';
 
-            strcpy (str4, str2);
-            strcat (str4, "!");
-            strcat (str4, " ");
-            strcat (str4, str2);
-            strcat (str4, str3);
-		    fputs( str4, p_new_file );
+			// get COMP_VALUE
+			j = 0;
+			while ( str_org[i+j+2] != ';' ){   // 2 is ' ' + '!' in str_org
+			   j++;
+		    }
+		    strncpy (str_val, str_org+i+2, j);
+			str_val[j] = '\0';
+
+			// get REFDES
+			strcpy (str_ref, str_org+i+j+2+2);  // 2 is ' ' + ';' in str_org
+
+			// combine into new string
+            strcpy (str_new, str_sym);   // SYM_NAME
+            strcat (str_new, "!");
+            strcat (str_new, " ");
+            strcat (str_new, str_sym);   // DEVICE_TYPE
+            strcat (str_new, "!");
+            strcat (str_new, " ");
+			strcat (str_new, "\'");
+			strcat (str_new, str_val);   // COMP_VALUE
+			strcat (str_new, "\'");
+			strcat (str_new, ";");
+            strcat (str_new, " ");
+			strcat (str_new, str_ref);
+		    fputs( str_new, p_new_file );
 		    continue;
 		}
-		fputs( str, p_new_file );
+
+		fputs( str_org, p_new_file );
 	}
 
 	printf("%s is created. Goodbye.\n", new_file_name);
