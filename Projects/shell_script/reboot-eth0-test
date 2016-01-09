@@ -1,0 +1,13 @@
+#!/bin/sh
+
+
+FOUND=`grep "eth0" /proc/net/dev`
+
+if  [ -n "$FOUND" ] ; then
+echo eth0 found >> /sdcard/find-eth0.txt 
+else
+echo eth0 not found >> /sdcard/find-eth0.txt
+fi
+
+reboot
+
